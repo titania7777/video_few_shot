@@ -22,7 +22,7 @@ categories = np.random.permutation(categories)
 folder_name = []
 for d in glob.glob(os.path.join(data_path, "UCF101_frames/*")):
     if os.path.isdir(d):
-        folder_name.append(d.split('/')[-1])
+        folder_name.append(d.split("\\" if os.name == 'nt' else "/")[-1])
 folder_name = pd.DataFrame(folder_name)
 
 # save train labels

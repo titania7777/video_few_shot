@@ -130,7 +130,7 @@ class UCF101(Dataset):
     
     def __getitem__(self, index):
         data_path = self.data_paths[index % len(self)]
-        sorted_frames_path = sorted(glob.glob(data_path+"/*.jpg"), key=lambda path: int(path.split(".jpg")[0].split("/")[-1]))
+        sorted_frames_path = sorted(glob.glob(data_path+"/*.jpg"), key=lambda path: int(path.split(".jpg")[0].split("\\" if os.name == 'nt' else "/")[-1]))
         sorted_frames_length = len(sorted_frames_path)
         assert sorted_frames_length is not 0, "please ensure that '{}' path is exist or not".format(data_path)
         

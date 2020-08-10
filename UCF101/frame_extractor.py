@@ -12,7 +12,7 @@ assert os.path.exists(frames_path) is False, "{} directory is alreay exist!!".fo
 os.makedirs(frames_path)
 
 for i, video_path in enumerate(videos_path_list):
-    frame_name = video_path.split('/')[-1].split('.avi')[0]
+    frame_name = video_path.split("\\" if os.name == 'nt' else "/")[-1].split('.avi')[0]
     frame_path = os.path.join(frames_path, frame_name)
     frames = [f.to_image() for f in av.open(video_path).decode(0)]
     os.makedirs(frame_path)

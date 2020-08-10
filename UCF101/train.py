@@ -53,8 +53,8 @@ if __name__ == "__main__":
     train_sampler = CategoriesSampler(train_dataset.classes, 100, args.way, args.shot, args.query)
     val_sampler = CategoriesSampler(val_dataset.classes, 200, args.way, args.shot, args.query)
     
-    train_loader = DataLoader(dataset=train_dataset, batch_sampler=train_sampler, num_workers=4, pin_memory=True)
-    val_loader = DataLoader(dataset=val_dataset, batch_sampler=val_sampler, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(dataset=train_dataset, batch_sampler=train_sampler, num_workers=0 if os.name == 'nt' else 4, pin_memory=True)
+    val_loader = DataLoader(dataset=val_dataset, batch_sampler=val_sampler, num_workers=0 if os.name == 'nt' else 4, pin_memory=True)
         
     model = Model(
         way=args.way,
