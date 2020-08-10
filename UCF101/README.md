@@ -28,7 +28,7 @@ extract frames from UCF101 videos.
 ```
 python frame_extractor.py
 ```
-split dataset for few-shot learning(you can ignore this process)
+split dataset for few-shot learning(you can skip this step)
 ```
 python splitter.py
 ```
