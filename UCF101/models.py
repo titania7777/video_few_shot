@@ -15,17 +15,16 @@ class Model(nn.Module):
         self.encoder = nn.Sequential(*list(resnet.children())[:-1])
         self._freeze(self.encoder)
         
-        # Adaptive Linear
-        self.adaptive_linear = nn.Sequential(
+        # Encoder Linear
+        self.encoder_linear = nn.Sequential(
             nn.Linear(resnet.fc.in_features, resnet.fc.in_features),
             nn.BatchNorm1d(resnet.fc.in_features),
             nn.ReLU(),
         )
-        self.adaptive_linear.apply(self._initialize)
+        self.encoder_linear.apply(self._initialize)
         
         # LSTM
         self.lstm = nn.LSTM(resnet.fc.in_features, hidden_size, num_layers, batch_first=True, bidirectional=bidirectional)
-        self.hidden = None
         
         # Linear
         self.linear = nn.Linear(2*hidden_size if bidirectional else hidden_size, hidden_size if bidirectional else int(hidden_size/2))
@@ -36,16 +35,13 @@ class Model(nn.Module):
         self.attention = nn.Linear(2 * hidden_size if bidirectional else hidden_size, 1)
         self.attention.apply(self._initialize)
 
-    def init_hidden(self):
-        self.hidden = None
-
     def forward(self, shot, query):
         x = torch.cat((shot, query), dim=0)
         b, s, c, h, w = x.shape
         x = self.encoder(x.view(b*s, c, h ,w))
-        x = self.adaptive_linear(x.view(b*s, -1))
+        x = self.encoder_linear(x.view(b*s, -1))
         # x = x.view(x.size(0), x.size(1), -1).mean(-1)
-        x, self.hidden = self.lstm(x.view(b, s, -1), self.hidden)
+        x = self.lstm(x.view(b, s, -1))[0]
         if self.use_attention:
             attention = F.softmax(self.attention(x).squeeze(-1), dim=-1)
             x = torch.sum(attention.unsqueeze(-1) * x, dim=1)

@@ -43,7 +43,7 @@ class UCF101(Dataset):
 
         lines = csv.readlines()
         for line in lines:
-            label, folder_name = line.split()
+            label, folder_name = line.rstrip().split(',')
             action = folder_name.split('_')[1]
             self.data_paths.append(os.path.join(frames_path, folder_name))
             self.classes.append(int(label))

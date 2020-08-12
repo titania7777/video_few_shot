@@ -1,6 +1,6 @@
 ## UCF101
 -------------
-this UCF101 sampler utilize autoaugment[1] when scarcity of frame in dataset, and additionally you can check another options.
+this UCF101 sampler support autoaugment[1] when scarcity of frame in dataset, and additionally you can check another options.
 
 * this sampler is working for few-shot video action recognition !!
 if you want action recognition(not few-shot) then [here](https://github.com/titania7777/Pytorch_Sampler/tree/master/UCF_101)
@@ -24,11 +24,10 @@ if you want action recognition(not few-shot) then [here](https://github.com/tita
 ## CategoriesSampler Options
 1. labels: this parameter receive of classes in csv files so must be UCF101.classes
 2. batch_size: batch size
-3. way: number of way(number of class)[2]
-4. shot: number of shot(number of shot data)[2]
-5. query: number of query(number of query data)[2]
-
-labels, batch_size, way, shot, query
+3. way: number of way(number of class)
+4. shot: number of shot(number of shot data)
+5. query: number of query(number of query data)  
+*way, shot, query => we follow episodic training stratiegy[2]
 
 
 download UCF101 dataset.

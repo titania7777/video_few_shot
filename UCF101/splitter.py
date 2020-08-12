@@ -32,7 +32,7 @@ with open(os.path.join(save_path, file_name[0]), 'w') as f:
         print("writing {}===".format(c))
         lines = np.concatenate(folder_name.loc[folder_name[0].str.contains('_' + c.strip('\n').split(' ')[1] + '_')].values, axis=0)
         for line in lines:
-            f.write(str(i+1) + ' '+ line) if first else f.write('\n' + str(i+1) + ' '+ line)
+            f.write(str(i+1) + ',' + line) if first else f.write('\n' + str(i+1) + ',' + line)
             first = False
 
 # save val labels
@@ -42,7 +42,7 @@ with open(os.path.join(save_path, file_name[1]), 'w') as f:
         print("writing {}===".format(c))
         lines = np.concatenate(folder_name.loc[folder_name[0].str.contains('_' + c.strip('\n').split(' ')[1] + '_')].values, axis=0)
         for line in lines:
-            f.write(str(i+1) + ' '+ line) if first else f.write('\n' + str(i+1) + ' '+ line)
+            f.write(str(i+1) + ',' + line) if first else f.write('\n' + str(i+1) + ',' + line)
             first = False
 
 # save test labels
@@ -52,5 +52,5 @@ with open(os.path.join(save_path, file_name[2]), 'w') as f:
         print("writing {}===".format(c))
         lines = np.concatenate(folder_name.loc[folder_name[0].str.contains('_' + c.strip('\n').split(' ')[1] + '_')].values, axis=0)
         for line in lines:
-            f.write(str(i+1) + ' '+ line) if first else f.write('\n' + str(i+1) + ' '+ line)
+            f.write(str(i+1) + ',' + line) if first else f.write('\n' + str(i+1) + ',' + line)
             first = False
