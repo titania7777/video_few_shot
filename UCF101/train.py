@@ -8,6 +8,20 @@ from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from UCF101 import UCF101, CategoriesSampler
 
+def printer(status, epoch, num_epochs, batch, num_batchs, loss, loss_mean, acc, acc_mean):
+    sys.stdout.write("\r[{}]-[Epoch {}/{}] [Batch {}/{}] [Loss: {:.2f} (mean: {:.2f}), Acc: {:.2f}% (mean: {:.2f}%)]".format(
+            status,
+            epoch,
+            num_epochs,
+            batch,
+            num_batchs,
+            loss,
+            loss_mean,
+            acc,
+            acc_mean
+        )
+    )
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--frames_path", type=str, default="../datas/UCF101_frames/")
@@ -97,19 +111,7 @@ if __name__ == "__main__":
             acc = 100 * (pred.argmax(1) == labels).type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor).mean().item()
             train_acc.append(acc)
 
-            sys.stdout.write(
-                "\rtrain-[Epoch {}/{}] [Batch {}/{}] [Loss: {:.2f} (mean: {:.2f}), Acc: {:.2f}% (mean: {:.2f}%)]".format
-                (
-                    e,
-                    args.num_epochs,
-                    i+1,
-                    len(train_loader),
-                    loss.item(),
-                    sum(train_loss)/len(train_loss),
-                    acc,
-                    sum(train_acc)/len(train_acc),
-                )
-            )
+            printer("train", e, args.num_epochs, i+1, len(train_loader), loss.item(), sum(train_loss)/len(train_loss), acc, sum(train_acc)/len(train_acc))
 
         print("")
         val_acc = []
@@ -131,23 +133,10 @@ if __name__ == "__main__":
             acc = 100 * (pred.argmax(1) == labels).type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor).mean().item()
             val_acc.append(acc)
 
-            sys.stdout.write(
-                "\rval-[Epoch {}/{}] [Batch {}/{}] [Loss: {:.2f} (mean: {:.2f}), Acc: {:.2f}% (mean: {:.2f}%), Best: {:.2f}%]".format
-                (
-                    e,
-                    args.num_epochs,
-                    i+1,
-                    len(val_loader),
-                    loss.item(),
-                    sum(val_loss)/len(val_loss),
-                    acc,
-                    sum(val_acc)/len(val_acc),
-                    best
-                )
-            )
+            printer("val", e, args.num_epochs, i+1, len(val_loader), loss.item(), sum(val_loss)/len(val_loss), acc, sum(val_acc)/len(val_acc))
         
-        print("")
         if sum(val_acc)/len(val_acc) > best:
             best = sum(val_acc)/len(val_acc)
+        print(" Best: {:.2f}%".format(best))
         
         lr_scheduler.step()
