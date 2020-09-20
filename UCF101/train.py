@@ -24,14 +24,17 @@ def printer(status, epoch, num_epochs, batch, num_batchs, loss, loss_mean, acc, 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--frames_path", type=str, default="../datas/UCF101_frames/")
-    parser.add_argument("--labels_path", type=str, default="./UCF101_few_shot_labels/")
-    parser.add_argument("--frame_size", type=str, default=224)
-    parser.add_argument("--num_epochs", type=int, default=40)
-    parser.add_argument("--sequence_length", type=int, default=40)
+    parser.add_argument("--frames-path", type=str, default="../Data/UCF101_frames/")
+    parser.add_argument("--labels-path", type=str, default="./UCF101_few_shot_labels/")
+    parser.add_argument("--frame-size", type=str, default=112)
+    parser.add_argument("--num-epochs", type=int, default=20)
+    parser.add_argument("--sequence-length", type=int, default=35)
+    parser.add_argument("--learning-rate", type=float, default=1e-5)
+    parser.add_argument("--scheduler-step-size", type=int, default=10)
+    parser.add_argument("--scheduler-gamma", type=float, default=0.9)
     parser.add_argument("--way", type=int, default=5)
     parser.add_argument("--shot", type=int, default=1)
-    parser.add_argument("--query", type=int, default=15)
+    parser.add_argument("--query", type=int, default=1)
     args = parser.parse_args()
 
     train_dataset = UCF101(
@@ -68,6 +71,7 @@ if __name__ == "__main__":
     train_sampler = CategoriesSampler(train_dataset.classes, 100, args.way, args.shot, args.query)
     val_sampler = CategoriesSampler(val_dataset.classes, 200, args.way, args.shot, args.query)
     
+    # in windows has some issue when try to use DataLoader in pytorch, i don't know why..
     train_loader = DataLoader(dataset=train_dataset, batch_sampler=train_sampler, num_workers=0 if os.name == 'nt' else 4, pin_memory=True)
     val_loader = DataLoader(dataset=val_dataset, batch_sampler=val_sampler, num_workers=0 if os.name == 'nt' else 4, pin_memory=True)
         
@@ -76,14 +80,14 @@ if __name__ == "__main__":
         shot=args.shot,
         query=args.query,
         num_layers=1,
-        hidden_size=1024,
+        hidden_size=512,
         bidirectional=True,
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.scheduler_step_size, gamma=args.scheduler_gamma)
 
     best = 0
     print("train... {}-way {}-shot {}-query".format(args.way, args.shot, args.query))
