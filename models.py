@@ -25,15 +25,15 @@ class R2Plus1D(nn.Module):
         x = x.transpose(1, 2).contiguous() # b, c, d, h, w
         x = self.encoder(x).squeeze()
 
-        # calculate similarity =================
         shot, query = x[:shot.size(0)], x[shot.size(0):]
+
         # make prototype
         shot = shot.reshape(self.shot, self.way, -1).mean(dim=0)
         shot = F.normalize(shot, dim=-1)
         query = F.normalize(query, dim=-1)
+
         # cosine similarity
         logits = torch.mm(query, shot.t())
-        # calculate similarity =================
 
         return logits * self.scaler
 
@@ -68,25 +68,21 @@ class Resnet(nn.Module):
         x = torch.cat((shot, query), dim=0)
         b, d, c, h, w = x.shape
 
-        # pre trained feature extractor =================
         x = x.view(b * d, c, h, w)
         x = self.encoder(x).squeeze()
-        # pre trained feature extractor =================
 
-        # additional layers =================
-        # lstm layer
+        # lstm
         x = x.view(b, d, 512)
         x = (self.lstm(x)[0]).mean(1)
-        # # additional layers =================
 
-        # calculate similarity =================
         shot, query = x[:shot.size(0)], x[shot.size(0):]
+
         # make prototype
         shot = shot.reshape(self.shot, self.way, -1).mean(dim=0)
         shot = F.normalize(shot, dim=-1)
         query = F.normalize(query, dim=-1)
+
         # cosine similarity
         logits = torch.mm(query, shot.t())
-        # calculate similarity =================
 
         return logits * self.scaler
