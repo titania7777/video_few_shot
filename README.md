@@ -25,11 +25,11 @@ python train.py --frames-path /path/to/frames --save-path /path/to/save --tensor
 ```
 test(resnet18)
 ```
-python test.py --way 5 --shot 1 --query 10 --model resnet --frames-path /path/to/frames --labels-path ./UCF101_few_shot_labels/
+python test.py --frames-path /path/to/frames --save-path /path/to/load/saved/ --model resnet --bidirectional --way 5 --shot 1 --query 10
 ```
 test(r2plus1d18)
 ```
-python test.py --way 5 --shot 1 --query 1 --model r2plus1d --frames-path /path/to/frames --labels-path ./UCF101_few_shot_labels/
+python test.py --frames-path /path/to/frames --save-path /path/to/load/saved/ --model r2plus1d --way 5 --shot 1 --query 1
 ```
 
 ## ```UCF101.py``` Options
