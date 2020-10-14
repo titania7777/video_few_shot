@@ -1,4 +1,8 @@
-# ignore datas
-/datas
 # ignore pycache
 __pycache__
+
+# save files
+save
+
+# tensorboard
+tensorboard

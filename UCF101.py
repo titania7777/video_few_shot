@@ -27,7 +27,7 @@ class UCF101(Dataset):
         self.random_interval = random_interval
 
         # read a csv file that already separated by splitter.py
-        assert setname in ['train', 'val', 'test'], "{} setname is invalid".format(setname)
+        assert setname in ['train', 'val', 'test'], "'{}' setname is invalid".format(setname)
         if setname == 'train':
             csv = open(os.path.join(labels_path, 'train.csv'))
         if setname == 'val':
@@ -52,7 +52,7 @@ class UCF101(Dataset):
         # transformer in training phase
         if setname == 'train':
             self.transform = transforms.Compose([
-                transforms.RandomResizedCrop(frame_size),
+                transforms.Resize((frame_size, frame_size)),
                 transforms.ToTensor(),
                 transforms.ColorJitter(
                     brightness=0.4, contrast=0.4, saturation=0.4
@@ -67,34 +67,32 @@ class UCF101(Dataset):
         else:
         # transformer in validation or testing phase
             self.transform = transforms.Compose([
-                transforms.Resize(frame_size + 32),
-                transforms.RandomResizedCrop(frame_size),
+                transforms.Resize((frame_size, frame_size)),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ])
         
         # autoaugment transformer for insufficient frames in training phase
         self.transform_autoaugment = transforms.Compose([
-            # transforms.RandomCrop(frame_size, padding=4, padding_mode='edge'),
-            transforms.RandomResizedCrop(frame_size),
+            transforms.Resize((frame_size, frame_size)),
             ImageNetPolicy(),
             transforms.ToTensor(),
         ])
 
-        print("UCF101 - Options...\n-Frame Size: {}\n-Sequence Length: {}\n-Set Name: '{}' \
-                                    \n-Random Pad Sample: {}\n-Pad Option: {}\n-Uniform Frame Sample \
-                                    \n-Random Start Position: {}\n-Max Interval: {}\n-Random Interval: {}\n"
-        .format(
-            frame_size,
-            sequence_length,
-            setname,
-            random_pad_sample,
-            pad_option,
-            uniform_frame_sample,
-            random_start_position,
-            max_interval,
-            random_interval,
-        ))
+        # print("UCF101 - Options...\n-Frame Size: {}\n-Sequence Length: {}\n-Set Name: '{}' \
+        #                             \n-Random Pad Sample: {}\n-Pad Option: '{}'\n-Uniform Frame Sample: {} \
+        #                             \n-Random Start Position: {}\n-Max Interval: {}\n-Random Interval: {}\n"
+        # .format(
+        #     frame_size,
+        #     sequence_length,
+        #     setname,
+        #     random_pad_sample,
+        #     pad_option,
+        #     uniform_frame_sample,
+        #     random_start_position,
+        #     max_interval,
+        #     random_interval,
+        # ))
 
     def __len__(self):
         return len(self.data_paths)
@@ -114,8 +112,9 @@ class UCF101(Dataset):
 
         # transform to Tensor
         if self.pad_option == 'autoaugment':
-            datas = [self.transform_autoaugment(Image.open(sorted_frames_path[s])) for s in sequence]    
-        datas = [self.transform(Image.open(sorted_frames_path[s])) for s in sequence]
+            datas = [self.transform_autoaugment(Image.open(sorted_frames_path[s])) for s in sequence]
+        else:
+            datas = [self.transform(Image.open(sorted_frames_path[s])) for s in sequence]
 
         return datas
 
@@ -125,7 +124,7 @@ class UCF101(Dataset):
 
         # set interval for uniform sampling of frames
         interval = sorted_frames_length // self.sequence_length
-        interval = 1 if interval is 0 else interval
+        interval = 1 if interval == 0 else interval
         interval = self.max_interval if interval >= self.max_interval else interval
         if self.random_interval:
             # set interval randomly
@@ -151,7 +150,7 @@ class UCF101(Dataset):
         data_path = self.data_paths[index % len(self)]
         sorted_frames_path = sorted(glob.glob(data_path+"/*.jpg"), key=lambda path: int(path.split(".jpg")[0].split("\\" if os.name == 'nt' else "/")[-1]))
         sorted_frames_length = len(sorted_frames_path)
-        assert sorted_frames_length is not 0, "'{}' Path is not exist or no frames in there.".format(data_path)
+        assert sorted_frames_length != 0, "'{}' Path is not exist or no frames in there.".format(data_path)
 
         # we may encounter error such as
         # 1. when insufficient frames of video rather than setted sequence length, _add_pads function will be solve this problem
@@ -206,9 +205,6 @@ class Lighting(object):
             return img
 
         alpha = img.new().resize_(3).normal_(0, self.alphastd)
-        rgb = self.eigvec.type_as(img).clone() \
-            .mul(alpha.view(1, 3).expand(3, 3)) \
-            .mul(self.eigval.view(1, 3).expand(3, 3)) \
-            .sum(1).squeeze()
+        rgb = self.eigvec.type_as(img).clone().mul(alpha.view(1, 3).expand(3, 3)).mul(self.eigval.view(1, 3).expand(3, 3)).sum(1).squeeze()
 
         return img.add(rgb.view(3, 1, 1).expand_as(img))
